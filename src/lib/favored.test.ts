@@ -41,12 +41,12 @@ function makeLeader(
 }
 
 describe("verdictFor", () => {
-  it("is favored at exactly the 53.5% threshold", () => {
-    expect(verdictFor(0.535)).toBe("favored");
+  it("is favored at exactly the 52.5% threshold", () => {
+    expect(verdictFor(0.525)).toBe("favored");
   });
 
-  it("is unfavored at exactly the 46.5% threshold", () => {
-    expect(verdictFor(0.465)).toBe("unfavored");
+  it("is unfavored at exactly the 47.5% threshold", () => {
+    expect(verdictFor(0.475)).toBe("unfavored");
   });
 
   it("is a coinflip between the thresholds", () => {

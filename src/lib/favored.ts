@@ -1,11 +1,11 @@
 import type { LeaderStats } from "../types/stats";
 
-export const FAVORED_THRESHOLD = 0.535;
-export const UNFAVORED_THRESHOLD = 0.465;
+export const FAVORED_THRESHOLD = 0.525;
+export const UNFAVORED_THRESHOLD = 0.475;
 
 export type Verdict = "favored" | "unfavored" | "even";
 
-// >=55% is favored, <=45% is unfavored (the opponent is favored), and
+// >=52.5% is favored, <=47.5% is unfavored (the opponent is favored), and
 // anything in between is treated as a coinflip rather than favored either
 // way, per the whole point of this view: skip results too close to 50/50.
 export function verdictFor(winRate: number): Verdict {
