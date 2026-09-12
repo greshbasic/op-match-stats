@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { leaderImageProxyUrl } from "./LeaderThumb";
 import { verdictFor, type FavoredRow, type FavoredSummary, type Verdict } from "../lib/favored";
 
@@ -12,6 +12,59 @@ const VERDICT_LABEL: Record<Verdict, string> = {
   even: "Coinflip",
 };
 
+// html-to-image re-fetches every <img> itself at capture time unless the src
+// is already a data: URL, in which case it uses it as-is with no network
+// activity at all. Relying on the browser reusing its HTTP cache for that
+// re-fetch turned out to be unreliable (particularly on mobile Safari), so
+// instead we fetch each thumbnail once here and hand html-to-image an
+// already-resolved data URL — nothing left for it to fetch or fail on.
+// Cached by leaderKey across leader switches, since most opponent
+// thumbnails are shared across the whole top-20 pool.
+const dataUrlCache = new Map<string, string>();
+
+function useThumbDataUrl(leaderKey: string, onSettle?: (leaderKey: string) => void) {
+  const [dataUrl, setDataUrl] = useState<string | null>(() => dataUrlCache.get(leaderKey) ?? null);
+
+  useEffect(() => {
+    const cached = dataUrlCache.get(leaderKey);
+    if (cached) {
+      setDataUrl(cached);
+      onSettle?.(leaderKey);
+      return;
+    }
+
+    let cancelled = false;
+    fetch(leaderImageProxyUrl(leaderKey))
+      .then((res) => res.blob())
+      .then(
+        (blob) =>
+          new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = reject;
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          })
+      )
+      .then((url) => {
+        dataUrlCache.set(leaderKey, url);
+        if (!cancelled) setDataUrl(url);
+      })
+      .catch(() => {
+        // Leave dataUrl null — the <img> falls back to the network URL,
+        // which is a best-effort attempt rather than a guarantee.
+      })
+      .finally(() => {
+        if (!cancelled) onSettle?.(leaderKey);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [leaderKey, onSettle]);
+
+  return dataUrl;
+}
+
 function ShareThumb({
   leaderKey,
   size,
@@ -19,18 +72,16 @@ function ShareThumb({
 }: {
   leaderKey: string;
   size: number;
-  onSettle?: (url: string) => void;
+  onSettle?: (leaderKey: string) => void;
 }) {
-  const url = leaderImageProxyUrl(leaderKey);
+  const dataUrl = useThumbDataUrl(leaderKey, onSettle);
   return (
     <img
       className="share-card__thumb"
       style={{ width: size, height: size }}
-      src={url}
+      src={dataUrl ?? leaderImageProxyUrl(leaderKey)}
       alt=""
       referrerPolicy="no-referrer"
-      onLoad={() => onSettle?.(url)}
-      onError={() => onSettle?.(url)}
     />
   );
 }
@@ -40,7 +91,7 @@ function ShareRow({
   onSettle,
 }: {
   row: FavoredRow;
-  onSettle?: (url: string) => void;
+  onSettle?: (leaderKey: string) => void;
 }) {
   return (
     <div className="share-card__row" data-verdict={row.verdict}>
@@ -85,7 +136,7 @@ interface Props {
   topN: number;
   summary: FavoredSummary;
   origin: string;
-  onImageSettle?: (url: string) => void;
+  onImageSettle?: (leaderKey: string) => void;
 }
 
 // Rendered off-screen and rasterized to PNG by the Share button — a

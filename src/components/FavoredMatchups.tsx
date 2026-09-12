@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { toBlob } from "html-to-image";
 import type { LeaderOption, Stats } from "../types/stats";
 import { LeaderSelect } from "./LeaderSelect";
-import { LeaderThumb, leaderImageProxyUrl } from "./LeaderThumb";
+import { LeaderThumb } from "./LeaderThumb";
 import { ShareCard } from "./ShareCard";
 import { sortByPlayRate } from "../lib/sortOptions";
 import { computeFavoredSummary, verdictFor, type Verdict } from "../lib/favored";
@@ -24,11 +24,11 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
   const [leaderKey, setLeaderKey] = useState<string | null>(null);
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
-  // URLs of share-card thumbnails confirmed loaded. Deliberately never
-  // reset on leader change — most opponent thumbnails are shared across
-  // leaders (same top-20 pool), and an <img> whose src doesn't change won't
-  // re-fire onLoad, so a previously-settled URL is still valid.
-  const [settledUrls, setSettledUrls] = useState<ReadonlySet<string>>(() => new Set());
+  // leaderKeys whose share-card thumbnail has resolved to a data URL.
+  // Deliberately never reset on leader change — most opponent thumbnails
+  // are shared across leaders (same top-20 pool), and a data URL fetched
+  // once for a leaderKey stays valid for every later leader that includes it.
+  const [settledKeys, setSettledKeys] = useState<ReadonlySet<string>>(() => new Set());
   const shareRef = useRef<HTMLDivElement>(null);
 
   const playRateByKey = useMemo(() => {
@@ -63,21 +63,15 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
     [leader, topLeaders]
   );
 
-  // The off-screen ShareCard's own thumbnails (header + every row) need to
-  // finish loading before a share, not just look loaded on screen — its
-  // <img> tags hit a different URL (the /api/img proxy) than the visible
-  // LeaderThumb rows. Waiting also means html-to-image's own image fetch at
-  // share time hits the browser's HTTP cache instead of re-requesting all of
-  // them from the proxy at once, which is what was producing blank
-  // thumbnails under load.
-  const requiredShareUrls = useMemo(() => {
+  // The off-screen ShareCard resolves each thumbnail to a data URL before
+  // the Share button is usable, so html-to-image has nothing left to fetch
+  // (and nothing to fail on) at capture time.
+  const requiredShareKeys = useMemo(() => {
     if (!leader || !summary) return [];
-    return [leader.leaderKey, ...summary.rows.map((r) => r.opponentKey)].map(
-      leaderImageProxyUrl
-    );
+    return [leader.leaderKey, ...summary.rows.map((r) => r.opponentKey)];
   }, [leader, summary]);
   const imagesReady =
-    requiredShareUrls.length > 0 && requiredShareUrls.every((u) => settledUrls.has(u));
+    requiredShareKeys.length > 0 && requiredShareKeys.every((k) => settledKeys.has(k));
 
   async function handleShare() {
     if (!shareRef.current || !leader) return;
@@ -239,8 +233,8 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
               topN={topLeaders.length}
               summary={summary}
               origin={typeof window !== "undefined" ? window.location.host : "op-match-stats"}
-              onImageSettle={(url) =>
-                setSettledUrls((prev) => (prev.has(url) ? prev : new Set(prev).add(url)))
+              onImageSettle={(key) =>
+                setSettledKeys((prev) => (prev.has(key) ? prev : new Set(prev).add(key)))
               }
             />
           </div>
