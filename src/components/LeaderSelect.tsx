@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { LeaderOption } from "../types/stats";
-import { LeaderThumb } from "./LeaderThumb";
+import { LeaderThumb, setCodeOf } from "./LeaderThumb";
 
 interface Props {
   label: string;
@@ -73,7 +73,9 @@ export function LeaderSelect({ label, options, value, onChange, placeholder }: P
     <div className="leader-select" ref={rootRef}>
       <label className="leader-select__label">{label}</label>
       <div
-        className={"leader-select__control" + (selected && !open ? " has-thumb" : "")}
+        className={
+          "leader-select__control" + (selected && !open ? " has-thumb has-set" : "")
+        }
         onKeyDown={onKeyDown}
       >
         {selected && !open && (
@@ -99,6 +101,9 @@ export function LeaderSelect({ label, options, value, onChange, placeholder }: P
           }}
           onFocus={() => setOpen(true)}
         />
+        {selected && !open && (
+          <span className="leader-select__set">{setCodeOf(selected.id)}</span>
+        )}
         <span className="leader-select__chevron" aria-hidden>
           ▼
         </span>
@@ -129,7 +134,7 @@ export function LeaderSelect({ label, options, value, onChange, placeholder }: P
             >
               <LeaderThumb leaderKey={o.id} name={o.name} size={30} />
               <span className="leader-select__option-name">{o.name}</span>
-              <span className="leader-select__option-id">{o.id}</span>
+              <span className="leader-select__option-id">{setCodeOf(o.id)}</span>
             </li>
           ))}
         </ul>

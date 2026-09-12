@@ -1,5 +1,5 @@
 import type { MatchupResultData } from "../types/stats";
-import { LeaderThumb } from "./LeaderThumb";
+import { LeaderThumb, setCodeOf } from "./LeaderThumb";
 
 const pct = (n: number | null) => (n === null ? "—" : `${(n * 100).toFixed(1)}%`);
 
@@ -20,11 +20,13 @@ export function MatchupResult({ data }: { data: MatchupResultData }) {
         <span className="result__vs-leader">
           <LeaderThumb leaderKey={data.myKey} name={data.myName} size={56} />
           <strong>{data.myName}</strong>
+          <span className="result__vs-leader-set">{setCodeOf(data.myKey)}</span>
         </span>
         <span className="result__vs">vs</span>
         <span className="result__vs-leader">
           <LeaderThumb leaderKey={data.opponentKey} name={data.opponentName} size={56} />
           <strong>{data.opponentName}</strong>
+          <span className="result__vs-leader-set">{setCodeOf(data.opponentKey)}</span>
         </span>
       </div>
 

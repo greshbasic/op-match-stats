@@ -5,6 +5,11 @@ import { useState } from "react";
 // on error, ending at a colored initials chip if none load.
 const setOf = (leaderKey: string) => leaderKey.slice(0, leaderKey.indexOf("-"));
 
+// The set code (e.g. "OP13") from a leaderKey like "OP13-004" — shown next to
+// leader names so leaders that share a name (multiple Luffy leaders, etc.)
+// are still distinguishable at a glance.
+export const setCodeOf = setOf;
+
 // Same-origin, so it's always embeddable in an exported canvas (e.g. the
 // share-card image) without running into the CDN's lack of CORS headers.
 export function leaderImageProxyUrl(leaderKey: string): string {

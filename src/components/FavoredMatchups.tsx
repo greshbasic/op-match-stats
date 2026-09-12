@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import type { LeaderOption, Stats } from "../types/stats";
 import { LeaderSelect } from "./LeaderSelect";
-import { LeaderThumb } from "./LeaderThumb";
+import { LeaderThumb, setCodeOf } from "./LeaderThumb";
 import { ShareCard } from "./ShareCard";
 import { sortByPlayRate } from "../lib/sortOptions";
 import { computeFavoredSummary, verdictFor, type Verdict } from "../lib/favored";
@@ -199,6 +199,7 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
                   >
                     <LeaderThumb leaderKey={opponentKey} name={opponentName} size={40} />
                     <span className="favored-list__name">{opponentName}</span>
+                    <span className="favored-list__set">{setCodeOf(opponentKey)}</span>
                     <span className="favored-list__badge">{VERDICT_LABEL[verdict]}</span>
                     <span className="favored-list__rate">{pct(winRate)}</span>
                   </button>

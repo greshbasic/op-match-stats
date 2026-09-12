@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useState } from "react";
-import { leaderImageProxyUrl } from "./LeaderThumb";
+import { leaderImageProxyUrl, setCodeOf } from "./LeaderThumb";
 import { verdictFor, type FavoredRow, type FavoredSummary, type Verdict } from "../lib/favored";
 
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
@@ -97,6 +97,7 @@ function ShareRow({
       <div className="share-card__row-main">
         <div className="share-card__row-top">
           <span className="share-card__row-name">{row.opponentName}</span>
+          <span className="share-card__row-set">{setCodeOf(row.opponentKey)}</span>
           <span className="share-card__row-badge">{VERDICT_LABEL[row.verdict]}</span>
           <span className="share-card__row-rate">{pct(row.winRate)}</span>
         </div>
@@ -168,7 +169,9 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard(
       <div className="share-card__header">
         <ShareThumb leaderKey={leaderKey} size={96} onSettle={onImageSettle} />
         <div className="share-card__heading">
-          <div className="share-card__title">{leaderName}</div>
+          <div className="share-card__title">
+            {leaderName} <span className="share-card__title-set">{setCodeOf(leaderKey)}</span>
+          </div>
           <div className="share-card__subtitle">Favored matchups vs. the top {topN} leaders</div>
           <div className="share-card__overall">
             <span>

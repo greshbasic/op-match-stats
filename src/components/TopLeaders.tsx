@@ -1,5 +1,5 @@
 import type { Stats } from "../types/stats";
-import { LeaderThumb } from "./LeaderThumb";
+import { LeaderThumb, setCodeOf } from "./LeaderThumb";
 
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 
@@ -20,6 +20,7 @@ export function TopLeaders({ stats, onBack }: { stats: Stats; onBack: () => void
             <span className="top-leaders__rank">{i + 1}</span>
             <LeaderThumb leaderKey={leader.leaderKey} name={leader.leaderName} size={44} />
             <span className="top-leaders__name">{leader.leaderName}</span>
+            <span className="top-leaders__set">{setCodeOf(leader.leaderKey)}</span>
             <span className="top-leaders__stats">
               <span className="top-leaders__stat">
                 <span className="top-leaders__stat-label">Wtd WR</span>
