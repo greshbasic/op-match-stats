@@ -612,6 +612,15 @@ body {
   font-size: 15px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.favored-detail__value[data-verdict="favored"] {
+  color: var(--second);
+}
+
+.favored-detail__value[data-verdict="unfavored"] {
+  color: var(--danger);
 }
 
 .app__footer {

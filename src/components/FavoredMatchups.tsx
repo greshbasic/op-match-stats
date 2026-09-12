@@ -3,7 +3,7 @@ import type { LeaderOption, Stats } from "../types/stats";
 import { LeaderSelect } from "./LeaderSelect";
 import { LeaderThumb } from "./LeaderThumb";
 import { sortByPlayRate } from "../lib/sortOptions";
-import { computeFavoredSummary, type Verdict } from "../lib/favored";
+import { computeFavoredSummary, verdictFor, type Verdict } from "../lib/favored";
 
 const TOP_N = 20;
 
@@ -16,6 +16,7 @@ const VERDICT_LABEL: Record<Verdict, string> = {
 };
 
 const pctOrDash = (n: number | null) => (n === null ? "—" : pct(n));
+const verdictOrNull = (n: number | null): Verdict | null => (n === null ? null : verdictFor(n));
 
 export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () => void }) {
   const [leaderKey, setLeaderKey] = useState<string | null>(null);
@@ -122,16 +123,22 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
                   {isExpanded && (
                     <div className="favored-detail">
                       <div className="favored-detail__stat">
-                        <span className="favored-detail__label">Raw</span>
-                        <span className="favored-detail__value">{pct(winRate)}</span>
-                      </div>
-                      <div className="favored-detail__stat">
                         <span className="favored-detail__label">Going first</span>
-                        <span className="favored-detail__value">{pctOrDash(firstWinRate)}</span>
+                        <span
+                          className="favored-detail__value"
+                          data-verdict={verdictOrNull(firstWinRate)}
+                        >
+                          {pctOrDash(firstWinRate)}
+                        </span>
                       </div>
                       <div className="favored-detail__stat">
                         <span className="favored-detail__label">Going second</span>
-                        <span className="favored-detail__value">{pctOrDash(secondWinRate)}</span>
+                        <span
+                          className="favored-detail__value"
+                          data-verdict={verdictOrNull(secondWinRate)}
+                        >
+                          {pctOrDash(secondWinRate)}
+                        </span>
                       </div>
                     </div>
                   )}
