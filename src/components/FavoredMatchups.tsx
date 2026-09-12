@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { toBlob } from "html-to-image";
+import html2canvas from "html2canvas";
 import type { LeaderOption, Stats } from "../types/stats";
 import { LeaderSelect } from "./LeaderSelect";
 import { LeaderThumb } from "./LeaderThumb";
@@ -64,8 +64,8 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
   );
 
   // The off-screen ShareCard resolves each thumbnail to a data URL before
-  // the Share button is usable, so html-to-image has nothing left to fetch
-  // (and nothing to fail on) at capture time.
+  // the Share button is usable, so there's nothing left to fetch (and
+  // nothing to fail on) once the user actually clicks it.
   const requiredShareKeys = useMemo(() => {
     if (!leader || !summary) return [];
     return [leader.leaderKey, ...summary.rows.map((r) => r.opponentKey)];
@@ -77,11 +77,19 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
     if (!shareRef.current || !leader) return;
     setIsSharing(true);
     try {
-      // html-to-image's image cache keys by URL with the query string
-      // stripped by default, so every leader's `/api/img?p=...` thumbnail
-      // collapses to the same cache key and all rows end up showing whoever
-      // resolved first. includeQueryParams keeps them distinct.
-      const blob = await toBlob(shareRef.current, { pixelRatio: 2, includeQueryParams: true });
+      // html2canvas walks the DOM and paints it directly via the Canvas 2D
+      // API. We use it instead of html-to-image (which serializes the DOM
+      // into an SVG <foreignObject> and rasterizes that) because Safari/
+      // WebKit — and therefore every browser on iOS — has long-standing bugs
+      // rendering foreignObject content to a canvas, producing a blank image
+      // on mobile while working fine on desktop Chrome.
+      const canvas = await html2canvas(shareRef.current, {
+        scale: 2,
+        backgroundColor: null,
+      });
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, "image/png")
+      );
       if (!blob) throw new Error("Failed to render share image");
 
       const filename = `${leader.leaderName.toLowerCase().replace(/\s+/g, "-")}-favored-matchups.png`;

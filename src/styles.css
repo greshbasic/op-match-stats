@@ -663,10 +663,26 @@ body {
   gap: 24px;
 }
 
-.share-card__thumb {
+.share-card__thumb-wrap {
+  position: relative;
+  overflow: hidden;
   border-radius: 12px;
-  object-fit: cover;
   flex: none;
+}
+
+/* html2canvas doesn't support object-fit, so "cover" is faked here with
+   absolute positioning + overflow: hidden on the wrapper instead — OPTCG
+   card art is a fixed portrait ratio, so matching width and letting height
+   overflow (cropped by the wrapper) reproduces the same crop object-fit:
+   cover would have given for a portrait image in a square box. */
+.share-card__thumb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  transform: translate(-50%, -50%);
 }
 
 .share-card__title {

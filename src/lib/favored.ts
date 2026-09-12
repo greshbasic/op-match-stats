@@ -31,20 +31,20 @@ export interface FavoredSummary {
   missing: number;
 }
 
-// Computes favored/unfavored/coinflip rows for `leader` against every other
-// leader in `pool` (typically the top N by weighted win rate). Leaders in the
-// pool with no recorded matchup against `leader` are excluded from `rows`
-// and counted in `missing` instead of being silently dropped.
+// Computes favored/unfavored/coinflip rows for `leader` against every
+// leader in `pool` (typically the top N by weighted win rate), including the
+// mirror matchup if `leader` is itself in `pool` — turn order can matter just
+// as much in the mirror as anywhere else. Leaders in the pool with no
+// recorded matchup against `leader` are excluded from `rows` and counted in
+// `missing` instead of being silently dropped.
 export function computeFavoredSummary(
   leader: LeaderStats,
   pool: LeaderStats[]
 ): FavoredSummary {
-  const opponents = pool.filter((o) => o.leaderKey !== leader.leaderKey);
-
   const rows: FavoredRow[] = [];
   let missing = 0;
 
-  for (const opp of opponents) {
+  for (const opp of pool) {
     const matchup = leader.matchups.find((m) => m.opponentKey === opp.leaderKey);
     if (!matchup) {
       missing++;

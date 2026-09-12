@@ -75,19 +75,28 @@ describe("computeFavoredSummary", () => {
       matchups: [makeMatchup("b", 0.7), makeMatchup("c", 0.5), makeMatchup("d", 0.3)],
     });
 
-    const summary = computeFavoredSummary(leader, [leader, b, c, d]);
+    const summary = computeFavoredSummary(leader, [b, c, d]);
 
     expect(summary.rows.map((r) => r.opponentKey)).toEqual(["b", "c", "d"]);
     expect(summary.counts).toEqual({ favored: 1, unfavored: 1, even: 1 });
     expect(summary.missing).toBe(0);
   });
 
-  it("excludes the leader itself from the opponent pool", () => {
+  it("includes the mirror matchup when the leader is in its own pool and has mirror data", () => {
+    const leader = makeLeader("a", { matchups: [makeMatchup("a", 0.55)] });
+    const summary = computeFavoredSummary(leader, [leader]);
+
+    expect(summary.rows.map((r) => r.opponentKey)).toEqual(["a"]);
+    expect(summary.counts).toEqual({ favored: 1, unfavored: 0, even: 0 });
+    expect(summary.missing).toBe(0);
+  });
+
+  it("counts the mirror as missing rather than dropping it when there's no mirror data", () => {
     const leader = makeLeader("a", { matchups: [] });
     const summary = computeFavoredSummary(leader, [leader]);
 
     expect(summary.rows).toEqual([]);
-    expect(summary.missing).toBe(0);
+    expect(summary.missing).toBe(1);
   });
 
   it("counts pool leaders with no recorded matchup as missing instead of dropping them silently", () => {
@@ -96,7 +105,7 @@ describe("computeFavoredSummary", () => {
     // A low-play leader that has only faced one of the two pool opponents.
     const leader = makeLeader("a", { matchups: [makeMatchup("b", 0.6)] });
 
-    const summary = computeFavoredSummary(leader, [leader, b, c]);
+    const summary = computeFavoredSummary(leader, [b, c]);
 
     expect(summary.rows.map((r) => r.opponentKey)).toEqual(["b"]);
     expect(summary.counts).toEqual({ favored: 1, unfavored: 0, even: 0 });
@@ -109,7 +118,7 @@ describe("computeFavoredSummary", () => {
       matchups: [makeMatchup("b", 0.5, { first_win_rate: 0.8, second_win_rate: 0.2 })],
     });
 
-    const summary = computeFavoredSummary(leader, [leader, b]);
+    const summary = computeFavoredSummary(leader, [b]);
 
     expect(summary.rows[0].firstWinRate).toBe(0.8);
     expect(summary.rows[0].secondWinRate).toBe(0.2);
@@ -120,7 +129,7 @@ describe("computeFavoredSummary", () => {
     const c = makeLeader("c");
     const leader = makeLeader("a", { matchups: [] });
 
-    const summary = computeFavoredSummary(leader, [leader, b, c]);
+    const summary = computeFavoredSummary(leader, [b, c]);
 
     expect(summary.rows).toEqual([]);
     expect(summary.counts).toEqual({ favored: 0, unfavored: 0, even: 0 });

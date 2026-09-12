@@ -12,14 +12,11 @@ const VERDICT_LABEL: Record<Verdict, string> = {
   even: "Coinflip",
 };
 
-// html-to-image re-fetches every <img> itself at capture time unless the src
-// is already a data: URL, in which case it uses it as-is with no network
-// activity at all. Relying on the browser reusing its HTTP cache for that
-// re-fetch turned out to be unreliable (particularly on mobile Safari), so
-// instead we fetch each thumbnail once here and hand html-to-image an
-// already-resolved data URL — nothing left for it to fetch or fail on.
-// Cached by leaderKey across leader switches, since most opponent
-// thumbnails are shared across the whole top-20 pool.
+// Fetch each thumbnail once here and hand the capture step an already-
+// resolved data: URL rather than a network URL — removes any network
+// dependency (and its failure modes) at share-click time entirely. Cached
+// by leaderKey across leader switches, since most opponent thumbnails are
+// shared across the whole top-20 pool.
 const dataUrlCache = new Map<string, string>();
 
 function useThumbDataUrl(leaderKey: string, onSettle?: (leaderKey: string) => void) {
@@ -76,13 +73,14 @@ function ShareThumb({
 }) {
   const dataUrl = useThumbDataUrl(leaderKey, onSettle);
   return (
-    <img
-      className="share-card__thumb"
-      style={{ width: size, height: size }}
-      src={dataUrl ?? leaderImageProxyUrl(leaderKey)}
-      alt=""
-      referrerPolicy="no-referrer"
-    />
+    <div className="share-card__thumb-wrap" style={{ width: size, height: size }}>
+      <img
+        className="share-card__thumb"
+        src={dataUrl ?? leaderImageProxyUrl(leaderKey)}
+        alt=""
+        referrerPolicy="no-referrer"
+      />
+    </div>
   );
 }
 
@@ -143,11 +141,10 @@ interface Props {
 // self-contained summary of the page for posting somewhere a link preview
 // wouldn't show the actual data (Discord, Reddit, etc).
 //
-// Forwards the ref onto this root node (not the off-screen positioning
-// wrapper around it) — html-to-image clones the captured node's own style,
-// so if the wrapper's `position: fixed; left: -99999px` were captured
-// instead, the clone would inherit that and render off-canvas, producing a
-// blank image.
+// Forwards the ref onto this root node, not the off-screen positioning
+// wrapper around it — capturing a node that itself has
+// `position: fixed; left: -99999px` bakes that offset into the render,
+// producing a blank image.
 export const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard(
   {
     leaderKey,
