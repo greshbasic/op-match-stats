@@ -62,6 +62,9 @@ function ShareRow({ row }: { row: FavoredRow }) {
 interface Props {
   leaderKey: string;
   leaderName: string;
+  rawWinRate: number;
+  firstWinRate: number;
+  secondWinRate: number;
   topN: number;
   summary: FavoredSummary;
   origin: string;
@@ -77,7 +80,7 @@ interface Props {
 // instead, the clone would inherit that and render off-canvas, producing a
 // blank image.
 export const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard(
-  { leaderKey, leaderName, topN, summary, origin },
+  { leaderKey, leaderName, rawWinRate, firstWinRate, secondWinRate, topN, summary, origin },
   ref
 ) {
   const half = Math.ceil(summary.rows.length / 2);
@@ -91,6 +94,30 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard(
         <div className="share-card__heading">
           <div className="share-card__title">{leaderName}</div>
           <div className="share-card__subtitle">Favored matchups vs. the top {topN} leaders</div>
+          <div className="share-card__overall">
+            <span>
+              Overall{" "}
+              <span className="share-card__overall-value">{pct(rawWinRate)}</span>
+            </span>
+            <span>
+              1st{" "}
+              <span
+                className="share-card__overall-value"
+                data-verdict={verdictFor(firstWinRate)}
+              >
+                {pct(firstWinRate)}
+              </span>
+            </span>
+            <span>
+              2nd{" "}
+              <span
+                className="share-card__overall-value"
+                data-verdict={verdictFor(secondWinRate)}
+              >
+                {pct(secondWinRate)}
+              </span>
+            </span>
+          </div>
         </div>
       </div>
 

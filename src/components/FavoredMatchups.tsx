@@ -62,7 +62,11 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
     if (!shareRef.current || !leader) return;
     setIsSharing(true);
     try {
-      const blob = await toBlob(shareRef.current, { pixelRatio: 2 });
+      // html-to-image's image cache keys by URL with the query string
+      // stripped by default, so every leader's `/api/img?p=...` thumbnail
+      // collapses to the same cache key and all rows end up showing whoever
+      // resolved first. includeQueryParams keeps them distinct.
+      const blob = await toBlob(shareRef.current, { pixelRatio: 2, includeQueryParams: true });
       if (!blob) throw new Error("Failed to render share image");
 
       const filename = `${leader.leaderName.toLowerCase().replace(/\s+/g, "-")}-favored-matchups.png`;
@@ -204,6 +208,9 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
               ref={shareRef}
               leaderKey={leader.leaderKey}
               leaderName={leader.leaderName}
+              rawWinRate={leader.raw_win_rate}
+              firstWinRate={leader.first_win_rate}
+              secondWinRate={leader.second_win_rate}
               topN={topLeaders.length}
               summary={summary}
               origin={typeof window !== "undefined" ? window.location.host : "op-match-stats"}
