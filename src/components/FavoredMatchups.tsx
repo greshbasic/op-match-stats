@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { toPng } from "html-to-image";
 import type { LeaderOption, Stats } from "../types/stats";
 import { LeaderSelect } from "./LeaderSelect";
 import { LeaderThumb } from "./LeaderThumb";
+import { ShareCard } from "./ShareCard";
 import { sortByPlayRate } from "../lib/sortOptions";
 import { computeFavoredSummary, verdictFor, type Verdict } from "../lib/favored";
 
@@ -21,6 +23,8 @@ const verdictOrNull = (n: number | null): Verdict | null => (n === null ? null :
 export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () => void }) {
   const [leaderKey, setLeaderKey] = useState<string | null>(null);
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const shareRef = useRef<HTMLDivElement>(null);
 
   const playRateByKey = useMemo(() => {
     const map = new Map<string, number>();
@@ -53,6 +57,22 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
     () => (leader ? computeFavoredSummary(leader, topLeaders) : null),
     [leader, topLeaders]
   );
+
+  async function handleShare() {
+    if (!shareRef.current || !leader) return;
+    setIsSharing(true);
+    try {
+      const dataUrl = await toPng(shareRef.current, { pixelRatio: 2 });
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `${leader.leaderName.toLowerCase().replace(/\s+/g, "-")}-favored-matchups.png`;
+      a.click();
+    } catch (err) {
+      console.error("Failed to render share image", err);
+    } finally {
+      setIsSharing(false);
+    }
+  }
 
   return (
     <main className="app__main">
@@ -94,6 +114,16 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
             </span>
             {summary.missing > 0 &&
               ` · no data yet for ${summary.missing} of them`}
+            {summary.rows.length > 0 && (
+              <button
+                type="button"
+                className="btn btn--share"
+                onClick={handleShare}
+                disabled={isSharing}
+              >
+                {isSharing ? "Rendering…" : "📤 Share as image"}
+              </button>
+            )}
           </p>
 
           {summary.rows.length === 0 && (
@@ -146,6 +176,17 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
               );
             })}
           </ol>
+
+          <div className="share-card-wrap" aria-hidden>
+            <ShareCard
+              ref={shareRef}
+              leaderKey={leader.leaderKey}
+              leaderName={leader.leaderName}
+              topN={topLeaders.length}
+              summary={summary}
+              origin={typeof window !== "undefined" ? window.location.host : "op-match-stats"}
+            />
+          </div>
         </>
       )}
     </main>

@@ -5,6 +5,12 @@ import { useState } from "react";
 // on error, ending at a colored initials chip if none load.
 const setOf = (leaderKey: string) => leaderKey.slice(0, leaderKey.indexOf("-"));
 
+// Same-origin, so it's always embeddable in an exported canvas (e.g. the
+// share-card image) without running into the CDN's lack of CORS headers.
+export function leaderImageProxyUrl(leaderKey: string): string {
+  return `/api/img?p=${encodeURIComponent(`cards_en/${setOf(leaderKey)}/${leaderKey}.png`)}`;
+}
+
 function imageUrls(leaderKey: string): string[] {
   const key = encodeURIComponent(leaderKey);
   const set = encodeURIComponent(setOf(leaderKey));
@@ -17,7 +23,7 @@ function imageUrls(leaderKey: string): string[] {
     `https://cdn.cardkaizoku.com/cards_en/${set}/${key}.png`,
     // 3) Last resort: our server-side proxy (spoofs the Referer). Path goes in a
     //    query param so Vercel routes it to the function, not the static layer.
-    `/api/img?p=${encodeURIComponent(`cards_en/${setOf(leaderKey)}/${leaderKey}.png`)}`,
+    leaderImageProxyUrl(leaderKey),
   ];
 }
 
