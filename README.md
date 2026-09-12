@@ -1,12 +1,13 @@
-# OPTCG Turn Calculator — First or Second?
+# OP Match Stats
 
-A small React + TypeScript + Vite web app that recommends whether to **go first**
-or **go second** in a One Piece TCG matchup, using live matchup win rates from the
-Card Kaizoku stats API.
+A small React + TypeScript + Vite web app for One Piece TCG matchup stats,
+leader rankings, and turn-order recommendations, using live matchup win rates
+from the Card Kaizoku stats API.
 
 Pick **your leader** and the **opponent leader**, hit **Analyze**, and the app
 compares the first-turn vs second-turn win rate for that pairing and tells you
-which turn order to choose.
+which turn order to choose. It also has Top 10 Leaders and Favored Matchups
+views for browsing the wider meta.
 
 ## Running locally
 

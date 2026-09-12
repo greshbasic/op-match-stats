@@ -15,8 +15,11 @@ const VERDICT_LABEL: Record<Verdict, string> = {
   even: "Coinflip",
 };
 
+const pctOrDash = (n: number | null) => (n === null ? "—" : pct(n));
+
 export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () => void }) {
   const [leaderKey, setLeaderKey] = useState<string | null>(null);
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
 
   const playRateByKey = useMemo(() => {
     const map = new Map<string, number>();
@@ -61,7 +64,10 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
           label="Leader"
           options={leaderOptions}
           value={leaderKey}
-          onChange={setLeaderKey}
+          onChange={(key) => {
+            setLeaderKey(key);
+            setExpandedKey(null);
+          }}
           placeholder="Search leader…"
         />
       </div>
@@ -96,14 +102,42 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
           )}
 
           <ol className="favored-list">
-            {summary.rows.map(({ opponentKey, opponentName, winRate, verdict }) => (
-              <li key={opponentKey} className="favored-list__row" data-verdict={verdict}>
-                <LeaderThumb leaderKey={opponentKey} name={opponentName} size={40} />
-                <span className="favored-list__name">{opponentName}</span>
-                <span className="favored-list__badge">{VERDICT_LABEL[verdict]}</span>
-                <span className="favored-list__rate">{pct(winRate)}</span>
-              </li>
-            ))}
+            {summary.rows.map(({ opponentKey, opponentName, winRate, verdict, firstWinRate, secondWinRate }) => {
+              const isExpanded = expandedKey === opponentKey;
+              return (
+                <li key={opponentKey} className="favored-list__item">
+                  <button
+                    type="button"
+                    className="favored-list__row"
+                    data-verdict={verdict}
+                    aria-expanded={isExpanded}
+                    onClick={() => setExpandedKey(isExpanded ? null : opponentKey)}
+                  >
+                    <LeaderThumb leaderKey={opponentKey} name={opponentName} size={40} />
+                    <span className="favored-list__name">{opponentName}</span>
+                    <span className="favored-list__badge">{VERDICT_LABEL[verdict]}</span>
+                    <span className="favored-list__rate">{pct(winRate)}</span>
+                  </button>
+
+                  {isExpanded && (
+                    <div className="favored-detail">
+                      <div className="favored-detail__stat">
+                        <span className="favored-detail__label">Raw</span>
+                        <span className="favored-detail__value">{pct(winRate)}</span>
+                      </div>
+                      <div className="favored-detail__stat">
+                        <span className="favored-detail__label">Going first</span>
+                        <span className="favored-detail__value">{pctOrDash(firstWinRate)}</span>
+                      </div>
+                      <div className="favored-detail__stat">
+                        <span className="favored-detail__label">Going second</span>
+                        <span className="favored-detail__value">{pctOrDash(secondWinRate)}</span>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ol>
         </>
       )}

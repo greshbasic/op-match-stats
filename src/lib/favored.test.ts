@@ -2,7 +2,11 @@ import { describe, it, expect } from "vitest";
 import { computeFavoredSummary, verdictFor } from "./favored";
 import type { LeaderStats, Matchup } from "../types/stats";
 
-function makeMatchup(opponentKey: string, matchupWinRate: number): Matchup {
+function makeMatchup(
+  opponentKey: string,
+  matchupWinRate: number,
+  overrides: Partial<Matchup> = {}
+): Matchup {
   return {
     opponent: opponentKey,
     opponentKey,
@@ -15,6 +19,7 @@ function makeMatchup(opponentKey: string, matchupWinRate: number): Matchup {
     second_wins: 0,
     second_games: 0,
     second_win_rate: null,
+    ...overrides,
   };
 }
 
@@ -96,6 +101,18 @@ describe("computeFavoredSummary", () => {
     expect(summary.rows.map((r) => r.opponentKey)).toEqual(["b"]);
     expect(summary.counts).toEqual({ favored: 1, unfavored: 0, even: 0 });
     expect(summary.missing).toBe(1);
+  });
+
+  it("carries through the first/second win rate split so turn-order-driven matchups aren't hidden", () => {
+    const b = makeLeader("b");
+    const leader = makeLeader("a", {
+      matchups: [makeMatchup("b", 0.5, { first_win_rate: 0.8, second_win_rate: 0.2 })],
+    });
+
+    const summary = computeFavoredSummary(leader, [leader, b]);
+
+    expect(summary.rows[0].firstWinRate).toBe(0.8);
+    expect(summary.rows[0].secondWinRate).toBe(0.2);
   });
 
   it("returns an empty summary when the pool has no data for the leader at all", () => {

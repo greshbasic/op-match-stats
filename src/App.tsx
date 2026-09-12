@@ -143,9 +143,9 @@ export default function App() {
   return (
     <div className="app">
       <header className="app__header">
-        <h1 className="app__title">First or Second?</h1>
+        <h1 className="app__title">OP Match Stats</h1>
         <p className="app__subtitle">
-          One Piece TCG turn-order recommendations from live matchup win rates.
+          One Piece TCG matchup stats, leader rankings, and turn-order recommendations.
         </p>
         {load.status === "ready" && view === "calculator" && (
           <div className="app__header-actions">

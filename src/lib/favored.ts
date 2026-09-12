@@ -19,6 +19,8 @@ export interface FavoredRow {
   opponentName: string;
   winRate: number;
   verdict: Verdict;
+  firstWinRate: number | null;
+  secondWinRate: number | null;
 }
 
 export interface FavoredSummary {
@@ -53,6 +55,8 @@ export function computeFavoredSummary(
       opponentName: opp.leaderName,
       winRate: matchup.matchup_win_rate,
       verdict: verdictFor(matchup.matchup_win_rate),
+      firstWinRate: matchup.first_win_rate,
+      secondWinRate: matchup.second_win_rate,
     });
   }
 
