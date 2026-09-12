@@ -1,8 +1,10 @@
 import { forwardRef } from "react";
 import { leaderImageProxyUrl } from "./LeaderThumb";
-import type { FavoredRow, FavoredSummary, Verdict } from "../lib/favored";
+import { verdictFor, type FavoredRow, type FavoredSummary, type Verdict } from "../lib/favored";
 
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
+const pctOrDash = (n: number | null) => (n === null ? "—" : pct(n));
+const verdictOrNull = (n: number | null): Verdict | null => (n === null ? null : verdictFor(n));
 
 const VERDICT_LABEL: Record<Verdict, string> = {
   favored: "Favored",
@@ -26,9 +28,33 @@ function ShareRow({ row }: { row: FavoredRow }) {
   return (
     <div className="share-card__row" data-verdict={row.verdict}>
       <ShareThumb leaderKey={row.opponentKey} size={48} />
-      <span className="share-card__row-name">{row.opponentName}</span>
-      <span className="share-card__row-badge">{VERDICT_LABEL[row.verdict]}</span>
-      <span className="share-card__row-rate">{pct(row.winRate)}</span>
+      <div className="share-card__row-main">
+        <div className="share-card__row-top">
+          <span className="share-card__row-name">{row.opponentName}</span>
+          <span className="share-card__row-badge">{VERDICT_LABEL[row.verdict]}</span>
+          <span className="share-card__row-rate">{pct(row.winRate)}</span>
+        </div>
+        <div className="share-card__row-split">
+          <span>
+            1st{" "}
+            <span
+              className="share-card__row-split-value"
+              data-verdict={verdictOrNull(row.firstWinRate)}
+            >
+              {pctOrDash(row.firstWinRate)}
+            </span>
+          </span>
+          <span>
+            2nd{" "}
+            <span
+              className="share-card__row-split-value"
+              data-verdict={verdictOrNull(row.secondWinRate)}
+            >
+              {pctOrDash(row.secondWinRate)}
+            </span>
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
