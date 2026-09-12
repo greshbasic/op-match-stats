@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { toPng } from "html-to-image";
+import { toBlob } from "html-to-image";
 import type { LeaderOption, Stats } from "../types/stats";
 import { LeaderSelect } from "./LeaderSelect";
 import { LeaderThumb } from "./LeaderThumb";
@@ -62,13 +62,35 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
     if (!shareRef.current || !leader) return;
     setIsSharing(true);
     try {
-      const dataUrl = await toPng(shareRef.current, { pixelRatio: 2 });
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `${leader.leaderName.toLowerCase().replace(/\s+/g, "-")}-favored-matchups.png`;
-      a.click();
+      const blob = await toBlob(shareRef.current, { pixelRatio: 2 });
+      if (!blob) throw new Error("Failed to render share image");
+
+      const filename = `${leader.leaderName.toLowerCase().replace(/\s+/g, "-")}-favored-matchups.png`;
+      const file = new File([blob], filename, { type: "image/png" });
+
+      // On mobile, sharing a file opens the native share sheet, where "Save
+      // Image" drops it straight into the camera roll — much easier than
+      // digging a downloaded file out of Downloads. Desktop browsers mostly
+      // don't support sharing files, so fall back to a plain download there.
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "OP Match Stats",
+          text: `${leader.leaderName} favored matchups vs. the top ${topLeaders.length} leaders`,
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
     } catch (err) {
-      console.error("Failed to render share image", err);
+      // The user closing the native share sheet also rejects as AbortError.
+      if (err instanceof Error && err.name !== "AbortError") {
+        console.error("Failed to render share image", err);
+      }
     } finally {
       setIsSharing(false);
     }
