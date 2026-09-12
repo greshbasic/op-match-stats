@@ -19,22 +19,29 @@ function ShareThumb({
 }: {
   leaderKey: string;
   size: number;
-  onSettle?: () => void;
+  onSettle?: (url: string) => void;
 }) {
+  const url = leaderImageProxyUrl(leaderKey);
   return (
     <img
       className="share-card__thumb"
       style={{ width: size, height: size }}
-      src={leaderImageProxyUrl(leaderKey)}
+      src={url}
       alt=""
       referrerPolicy="no-referrer"
-      onLoad={onSettle}
-      onError={onSettle}
+      onLoad={() => onSettle?.(url)}
+      onError={() => onSettle?.(url)}
     />
   );
 }
 
-function ShareRow({ row, onSettle }: { row: FavoredRow; onSettle?: () => void }) {
+function ShareRow({
+  row,
+  onSettle,
+}: {
+  row: FavoredRow;
+  onSettle?: (url: string) => void;
+}) {
   return (
     <div className="share-card__row" data-verdict={row.verdict}>
       <ShareThumb leaderKey={row.opponentKey} size={48} onSettle={onSettle} />
@@ -78,7 +85,7 @@ interface Props {
   topN: number;
   summary: FavoredSummary;
   origin: string;
-  onImageSettle?: () => void;
+  onImageSettle?: (url: string) => void;
 }
 
 // Rendered off-screen and rasterized to PNG by the Share button — a
