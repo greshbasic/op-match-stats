@@ -12,7 +12,15 @@ const VERDICT_LABEL: Record<Verdict, string> = {
   even: "Coinflip",
 };
 
-function ShareThumb({ leaderKey, size }: { leaderKey: string; size: number }) {
+function ShareThumb({
+  leaderKey,
+  size,
+  onSettle,
+}: {
+  leaderKey: string;
+  size: number;
+  onSettle?: () => void;
+}) {
   return (
     <img
       className="share-card__thumb"
@@ -20,14 +28,16 @@ function ShareThumb({ leaderKey, size }: { leaderKey: string; size: number }) {
       src={leaderImageProxyUrl(leaderKey)}
       alt=""
       referrerPolicy="no-referrer"
+      onLoad={onSettle}
+      onError={onSettle}
     />
   );
 }
 
-function ShareRow({ row }: { row: FavoredRow }) {
+function ShareRow({ row, onSettle }: { row: FavoredRow; onSettle?: () => void }) {
   return (
     <div className="share-card__row" data-verdict={row.verdict}>
-      <ShareThumb leaderKey={row.opponentKey} size={48} />
+      <ShareThumb leaderKey={row.opponentKey} size={48} onSettle={onSettle} />
       <div className="share-card__row-main">
         <div className="share-card__row-top">
           <span className="share-card__row-name">{row.opponentName}</span>
@@ -68,6 +78,7 @@ interface Props {
   topN: number;
   summary: FavoredSummary;
   origin: string;
+  onImageSettle?: () => void;
 }
 
 // Rendered off-screen and rasterized to PNG by the Share button — a
@@ -80,7 +91,17 @@ interface Props {
 // instead, the clone would inherit that and render off-canvas, producing a
 // blank image.
 export const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard(
-  { leaderKey, leaderName, rawWinRate, firstWinRate, secondWinRate, topN, summary, origin },
+  {
+    leaderKey,
+    leaderName,
+    rawWinRate,
+    firstWinRate,
+    secondWinRate,
+    topN,
+    summary,
+    origin,
+    onImageSettle,
+  },
   ref
 ) {
   const half = Math.ceil(summary.rows.length / 2);
@@ -90,7 +111,7 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard(
   return (
     <div className="share-card" ref={ref}>
       <div className="share-card__header">
-        <ShareThumb leaderKey={leaderKey} size={96} />
+        <ShareThumb leaderKey={leaderKey} size={96} onSettle={onImageSettle} />
         <div className="share-card__heading">
           <div className="share-card__title">{leaderName}</div>
           <div className="share-card__subtitle">Favored matchups vs. the top {topN} leaders</div>
@@ -139,12 +160,12 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard(
       <div className="share-card__columns">
         <div className="share-card__column">
           {left.map((row) => (
-            <ShareRow key={row.opponentKey} row={row} />
+            <ShareRow key={row.opponentKey} row={row} onSettle={onImageSettle} />
           ))}
         </div>
         <div className="share-card__column">
           {right.map((row) => (
-            <ShareRow key={row.opponentKey} row={row} />
+            <ShareRow key={row.opponentKey} row={row} onSettle={onImageSettle} />
           ))}
         </div>
       </div>

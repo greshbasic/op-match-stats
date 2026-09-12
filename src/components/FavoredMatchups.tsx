@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toBlob } from "html-to-image";
 import type { LeaderOption, Stats } from "../types/stats";
 import { LeaderSelect } from "./LeaderSelect";
@@ -24,6 +24,7 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
   const [leaderKey, setLeaderKey] = useState<string | null>(null);
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [settledImages, setSettledImages] = useState(0);
   const shareRef = useRef<HTMLDivElement>(null);
 
   const playRateByKey = useMemo(() => {
@@ -57,6 +58,20 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
     () => (leader ? computeFavoredSummary(leader, topLeaders) : null),
     [leader, topLeaders]
   );
+
+  // The off-screen ShareCard's own thumbnails (header + every row) need to
+  // finish loading before a share, not just look loaded on screen — its
+  // <img> tags hit a different URL (the /api/img proxy) than the visible
+  // LeaderThumb rows. Waiting also means html-to-image's own image fetch at
+  // share time hits the browser's HTTP cache instead of re-requesting all of
+  // them from the proxy at once, which is what was producing blank
+  // thumbnails under load.
+  useEffect(() => {
+    setSettledImages(0);
+  }, [leaderKey]);
+
+  const totalShareImages = summary ? 1 + summary.rows.length : 0;
+  const imagesReady = settledImages >= totalShareImages;
 
   async function handleShare() {
     if (!shareRef.current || !leader) return;
@@ -145,9 +160,13 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
                 type="button"
                 className="btn btn--share"
                 onClick={handleShare}
-                disabled={isSharing}
+                disabled={isSharing || !imagesReady}
               >
-                {isSharing ? "Rendering…" : "📤 Share as image"}
+                {isSharing
+                  ? "Rendering…"
+                  : imagesReady
+                    ? "📤 Share as image"
+                    : "Loading images…"}
               </button>
             )}
           </p>
@@ -214,6 +233,7 @@ export function FavoredMatchups({ stats, onBack }: { stats: Stats; onBack: () =>
               topN={topLeaders.length}
               summary={summary}
               origin={typeof window !== "undefined" ? window.location.host : "op-match-stats"}
+              onImageSettle={() => setSettledImages((c) => c + 1)}
             />
           </div>
         </>
