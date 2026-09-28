@@ -523,6 +523,12 @@ body {
   gap: 4px 0;
 }
 
+.favored__note {
+  margin: -8px 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .btn--share {
   margin-left: 12px;
   padding: 6px 12px;

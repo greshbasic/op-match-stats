@@ -136,6 +136,7 @@ interface Props {
   summary: FavoredSummary;
   origin: string;
   onImageSettle?: (leaderKey: string) => void;
+  subtitle?: string;
 }
 
 // Rendered off-screen and rasterized to PNG by the Share button — a
@@ -157,6 +158,7 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard(
     summary,
     origin,
     onImageSettle,
+    subtitle,
   },
   ref
 ) {
@@ -172,7 +174,9 @@ export const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard(
           <div className="share-card__title">
             {leaderName} <span className="share-card__title-set">{setCodeOf(leaderKey)}</span>
           </div>
-          <div className="share-card__subtitle">Favored matchups vs. the top {topN} leaders</div>
+          <div className="share-card__subtitle">
+            {subtitle ?? `Favored matchups vs. the top ${topN} leaders`}
+          </div>
           <div className="share-card__overall">
             <span>
               Overall{" "}

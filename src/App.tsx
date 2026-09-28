@@ -3,12 +3,13 @@ import { LeaderSelect } from "./components/LeaderSelect";
 import { MatchupResult } from "./components/MatchupResult";
 import { TopLeaders } from "./components/TopLeaders";
 import { FavoredMatchups } from "./components/FavoredMatchups";
+import { PirateParty } from "./components/PirateParty";
 import { fetchStats, StatsError } from "./services/statsApi";
 import { recommend } from "./lib/recommend";
 import { sortByPlayRate } from "./lib/sortOptions";
 import type { LeaderOption, MatchupResultData, Stats } from "./types/stats";
 
-type View = "calculator" | "top-leaders" | "favored";
+type View = "calculator" | "top-leaders" | "favored" | "pirate-party";
 
 type LoadState =
   | { status: "loading" }
@@ -155,6 +156,9 @@ export default function App() {
             <button className="btn btn--top-leaders" onClick={() => setView("favored")}>
               ⚖️ Favored Matchups
             </button>
+            <button className="btn btn--top-leaders" onClick={() => setView("pirate-party")}>
+              🏴‍☠️ Pirate Party
+            </button>
           </div>
         )}
       </header>
@@ -179,6 +183,10 @@ export default function App() {
 
       {load.status === "ready" && view === "favored" && (
         <FavoredMatchups stats={load.stats} onBack={() => setView("calculator")} />
+      )}
+
+      {load.status === "ready" && view === "pirate-party" && (
+        <PirateParty stats={load.stats} onBack={() => setView("calculator")} />
       )}
 
       {load.status === "ready" && view === "calculator" && (
