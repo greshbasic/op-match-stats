@@ -10,7 +10,7 @@ const MAX_DAYS_BACK = 14;
 // In dev we hit the same-origin Vite proxy (see vite.config.ts) which forwards
 // to the CDN server-side, avoiding the CDN's missing CORS headers.
 export const statsUrl = (yyyymmdd: string) =>
-  `/api/stats/stats_${SET}_p_${yyyymmdd}.json?v=${yyyymmdd}`;
+  `/api/stats/stats_${SET}_lw_p_${yyyymmdd}.json?v=${yyyymmdd}`;
 
 export function formatDate(d: Date): string {
   const y = d.getFullYear();
