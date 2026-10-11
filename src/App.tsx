@@ -154,10 +154,10 @@ export default function App() {
               🏆 Top 10 Leaders
             </button>
             <button className="btn btn--top-leaders" onClick={() => setView("favored")}>
-              ⚖️ Favored Matchups
+              ⚖️ Favored Matchups (vs. Top 20)
             </button>
             <button className="btn btn--top-leaders" onClick={() => setView("pirate-party")}>
-              🏴‍☠️ Pirate Party
+              🏴‍☠️ Pirate Party (vs. Top 20)
             </button>
           </div>
         )}
