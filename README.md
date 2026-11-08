@@ -68,7 +68,7 @@ on push.)
 The stats endpoint (e.g.)
 
 ```
-https://cdn.cardkaizoku.com/stats/ranking_eb05_lw_p_top20_20261108.json?v=20261108
+https://cdn.cardkaizoku.com/stats/stats_eb05_lw_p_top20_20261108.json?v=20261108
 ```
 
 returns `200 OK` and valid JSON, **but it does not send an

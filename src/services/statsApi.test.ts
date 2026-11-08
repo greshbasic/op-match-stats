@@ -38,7 +38,7 @@ describe("date helpers", () => {
 
   it("statsUrl embeds the date in both the filename and the cache-bust param", () => {
     expect(statsUrl("20260830")).toBe(
-      "/api/stats/ranking_eb05_lw_p_top20_20260830.json?v=20260830"
+      "/api/stats/stats_eb05_lw_p_top20_20260830.json?v=20260830"
     );
   });
 
