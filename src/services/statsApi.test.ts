@@ -12,7 +12,7 @@ const validStats = [
     leaderKey: "OP13-004",
     leaderName: "Sabo",
     matchups: [
-      { opponent: "OP17-099", first_win_rate: 0.503, second_win_rate: 0.635 },
+      { opponent: "EB05-099", first_win_rate: 0.503, second_win_rate: 0.635 },
       { opponent: "P-076", first_win_rate: 1, second_win_rate: null },
     ],
   },
@@ -38,7 +38,7 @@ describe("date helpers", () => {
 
   it("statsUrl embeds the date in both the filename and the cache-bust param", () => {
     expect(statsUrl("20260830")).toBe(
-      "/api/stats/stats_op17_p_20260830.json?v=20260830"
+      "/api/stats/ranking_eb05_lw_p_top20_20260830.json?v=20260830"
     );
   });
 

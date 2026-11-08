@@ -68,7 +68,7 @@ on push.)
 The stats endpoint (e.g.)
 
 ```
-https://cdn.cardkaizoku.com/stats/stats_op17_lw_20260830.json?v=20260830
+https://cdn.cardkaizoku.com/stats/ranking_eb05_lw_p_top20_20261108.json?v=20261108
 ```
 
 returns `200 OK` and valid JSON, **but it does not send an
@@ -87,12 +87,12 @@ ever makes a same-origin request.
 
 ## Dynamic snapshot date
 
-The filename embeds a date (`..._lw_20260830.json`). The CDN publishes a new
-**daily** snapshot and retains a rolling window (~8 days); older/future dates
+The filename embeds a date (`..._lw_p_top20_20261108.json`). The CDN publishes a
+new **daily** snapshot and retains a rolling window (~8 days); older/future dates
 return 404. Rather than hardcode a date, `statsApi.ts` starts at today and walks
 backwards a day at a time until a snapshot loads, so the app always uses the most
 recent available data (and gracefully handles timezone skew or a not-yet-published
-day). The resolved date is shown in the footer. The set prefix (`op17`) is a
+day). The resolved date is shown in the footer. The set prefix (`eb05`) is a
 constant since it only changes on a new set release.
 
 ## How the data flows

@@ -218,7 +218,7 @@ export default function App() {
       )}
 
       <footer className="app__footer">
-        Data: Card Kaizoku · OP17
+        Data: Card Kaizoku · EB05
         {load.status === "ready" && ` · snapshot ${formatSnapshotDate(load.date)}`}
         {" · Recommends the higher win-rate turn order."}
       </footer>

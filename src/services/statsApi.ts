@@ -1,16 +1,16 @@
 import type { LeaderStats, Matchup, Stats } from "../types/stats";
 
-// The stats set prefix (e.g. "op17") only changes when a new set is released,
+// The stats set prefix (e.g. "eb05") only changes when a new set is released,
 // so it stays a constant. The date part is dynamic: the CDN publishes a new
 // daily snapshot and keeps a rolling window (~8 days), so we resolve the most
 // recent available date at load time instead of hardcoding it.
-const SET = "op17";
+const SET = "eb05";
 const MAX_DAYS_BACK = 14;
 
 // In dev we hit the same-origin Vite proxy (see vite.config.ts) which forwards
 // to the CDN server-side, avoiding the CDN's missing CORS headers.
 export const statsUrl = (yyyymmdd: string) =>
-  `/api/stats/stats_${SET}_lw_p_top20_${yyyymmdd}.json?v=${yyyymmdd}`;
+  `/api/stats/ranking_${SET}_lw_p_top20_${yyyymmdd}.json?v=${yyyymmdd}`;
 
 export function formatDate(d: Date): string {
   const y = d.getFullYear();
